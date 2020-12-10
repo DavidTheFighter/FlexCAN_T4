@@ -181,6 +181,20 @@ typedef struct CANFD_timings_t {
   FLEXCAN_CLOCK clock = CLK_24MHz; 
 } CANFD_timings_t;
 
+typedef struct CANFD_exact_timings_t {
+  uint8_t prop_seg;
+  uint8_t phase_seg_1;
+  uint8_t phase_seg_2;
+  uint8_t jump_width;
+  uint8_t prescalar_division;
+  uint8_t fd_prop_seg;
+  uint8_t fd_phase_seg_1;
+  uint8_t fd_phase_seg_2;
+  uint8_t fd_jump_width;
+  uint8_t fd_prescalar_division;
+  uint8_t tdcoff;
+} CANFD_exact_timings_t;
+
 typedef enum FLEXCAN_IDE {
   NONE = 0,
   EXT = 1,
@@ -333,6 +347,7 @@ FCTPFD_CLASS class FlexCAN_T4FD : public FlexCAN_T4_Base {
     bool setBaudRateAdvanced(CANFD_timings_t config, uint8_t nominal_choice, uint8_t flexdata_choice, FLEXCAN_RXTX listen_only = TX);
     bool setBaudRate(CANFD_timings_t config, FLEXCAN_RXTX listen_only = TX);
     void setBaudRate(FLEXCAN_FDRATES input, FLEXCAN_RXTX listen_only = TX);
+    void setExactTimings(CANFD_exact_timings_t config);
     void enableMBInterrupt(const FLEXCAN_MAILBOX &mb_num, bool status = 1);
     void disableMBInterrupt(const FLEXCAN_MAILBOX &mb_num) { enableMBInterrupt(mb_num, 0); }
     void enableMBInterrupts(bool status = 1);

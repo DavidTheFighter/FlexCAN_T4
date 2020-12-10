@@ -567,3 +567,32 @@ FCTPFD_FUNC uint32_t FCTPFD_OPT::setBaudRateFD(CANFD_timings_t config, uint32_t 
   }
   return 0;
 }
+
+FCTPFD_FUNC void FCTPFD_OPT::setExactTimings(CANFD_exact_timings_t config) {
+  uint32_t cbt = 0;
+  cbt |= ((uint32_t)(constrain(config.phase_seg_2, 1, 31) - 1) << 0); // EPSEG2
+  cbt |= ((uint32_t)(constrain(config.phase_seg_1, 1, 31)- 1) << 5); // EPSEG1
+  cbt |= ((uint32_t)(constrain(config.prop_seg, 1, 63) - 1) << 10); // EPROPSEG
+  cbt |= ((uint32_t)(constrain(config.jump_width, 1, 31) - 1) << 16); // ERJW
+  cbt |= ((uint32_t)(constrain(config.prescalar_division, 1, 1023) - 1) << 21); // EPRESDIV
+  cbt |= (1UL << 31); // BTF
+
+  uint32_t fdcbt = 0;
+  fdcbt |= ((uint32_t)(constrain(config.fd_phase_seg_2, 1, 8) - 1) << 0); // FPSEG2
+  fdcbt |= ((uint32_t)(constrain(config.fd_phase_seg_1 , 1, 8)- 1) << 5); // FPSEG1
+  fdcbt |= ((uint32_t)(constrain(config.fd_prop_seg, 1, 31) - 1) << 10); // FPROPSEG
+  fdcbt |= ((uint32_t)(constrain(config.fd_jump_width, 1, 8) - 1) << 16); // FRJW
+  fdcbt |= ((uint32_t)(constrain(config.fd_prescalar_division, 1, 1023) - 1) << 20); // FPRESDIV
+
+  FLEXCAN_EnterFreezeMode();
+  FLEXCANb_CBT(_bus) = cbt;
+  FLEXCANb_FDCBT(_bus) = fdcbt;
+
+  FLEXCANb_FDCTRL(_bus) = (FLEXCANb_FDCTRL(_bus) & 0xFFFF60FF);
+
+  if (config.tdcoff > 0 && config.tdcoff < 32) {
+    FLEXCANb_FDCTRL(_bus) |= (1UL << 15) | (((uint32_t)(config.tdcoff)) << 8);
+  }
+  
+  FLEXCAN_ExitFreezeMode();
+}
